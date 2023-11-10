@@ -2,9 +2,6 @@ locals {
   define_lifecycle_rule = var.noncurrent_version_expiration != null || length(var.noncurrent_version_transitions) > 0
 }
 
-data "aws_region" "state" {
-}
-
 #---------------------------------------------------------------------------------------------------
 # KMS Key to Encrypt S3 Bucket
 #---------------------------------------------------------------------------------------------------
@@ -18,7 +15,7 @@ resource "aws_kms_key" "this" {
 }
 
 resource "aws_kms_alias" "this" {
-  name          = "alias/${var.kms_key_alias}"
+  name_prefix   = "alias/${module.label.id}"
   target_key_id = aws_kms_key.this.key_id
 }
 
@@ -58,12 +55,12 @@ resource "aws_s3_bucket_policy" "state_force_ssl" {
   depends_on = [aws_s3_bucket_public_access_block.state]
 }
 
+# tfsec:ignore:aws-s3-enable-bucket-logging
 resource "aws_s3_bucket" "state" {
-  bucket_prefix = var.override_s3_bucket_name ? null : var.state_bucket_prefix
-  bucket        = var.override_s3_bucket_name ? var.s3_bucket_name : null
+  bucket_prefix = module.label.id
   force_destroy = var.s3_bucket_force_destroy
 
-  tags = var.tags
+  tags = module.label.tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "state" {
