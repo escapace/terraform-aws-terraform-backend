@@ -55,7 +55,7 @@ resource "aws_s3_bucket_policy" "state_force_ssl" {
   depends_on = [aws_s3_bucket_public_access_block.state]
 }
 
-# tfsec:ignore:aws-s3-enable-bucket-logging
+# trivy:ignore:s3-bucket-logging
 resource "aws_s3_bucket" "state" {
   bucket_prefix = module.label.id
   force_destroy = var.s3_bucket_force_destroy
